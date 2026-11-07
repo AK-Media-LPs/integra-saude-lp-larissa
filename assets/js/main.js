@@ -32,9 +32,9 @@ class Component extends DCLogic {
   componentDidMount() {
     var me = this;
     var both = function () { me.drawTraco(); };
-    both();
+    requestAnimationFrame(function () { setTimeout(both, 0); });
     this.dt = [setTimeout(both, 400), setTimeout(both, 1500)];
-    this.onDt = both;
+    var rz = 0; this.onDt = function () { if (rz) return; rz = requestAnimationFrame(function () { rz = 0; both(); }); };
     window.addEventListener('resize', this.onDt);
     this.startMotion();
     this.setupBar();
@@ -143,7 +143,7 @@ class Component extends DCLogic {
     g.registerPlugin(ST);
     d.classList.add('gs');
     this.ctx = g.context(function () { self.motion(g, ST); });
-    this.onLd = function () { ST.refresh(); };
+    var tl; this.onLd = function () { clearTimeout(tl); tl = setTimeout(function () { ST.refresh(); }, 200); };
     if (window.ResizeObserver) { var tm; this.ro = new ResizeObserver(function () { clearTimeout(tm); tm = setTimeout(function () { ST.refresh(); }, 250); }); this.ro.observe(document.body); }
     window.addEventListener('load', this.onLd);
     document.querySelectorAll('img').forEach(function (i) { if (!i.complete) i.addEventListener('load', self.onLd, { once: true }); });
