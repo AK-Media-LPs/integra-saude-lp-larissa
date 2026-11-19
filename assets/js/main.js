@@ -268,81 +268,46 @@ class Component extends DCLogic {
     });
   }
   setupMascot() {
-    var el = document.querySelector('.tms'), ph = document.querySelector('.tph'), bub = document.querySelector('.tmb'), svg = el && el.querySelector('svg');
+    var el = document.querySelector('.tms'), ph = document.querySelector('.tph'), bub = document.querySelector('.tmb');
     if (!el || !ph) return;
     var S = [['#topo','Oi! Vem comigo?'],['#quando','Essas são as áreas dela'],['#sobre','Prazer, Dra. Larissa'],['#sinais','Algum desses é você?'],['#avaliacao','Tudo explicado, sem pressa'],['#duvidas','Dúvida? Tem resposta aqui'],['#clinica','Olha o consultório'],['#local','Fica fácil de chegar'],['#final','Bora agendar?']].map(function (x) { return [document.querySelector(x[0]), x[1]]; }).filter(function (x) { return x[0]; });
-    var calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var st = 0, cur = -1, raf = 0, dead = false;
+    var raf = 0, lastY = window.scrollY, wt = 0, st = 0, cur = -1, dir = 1, walking = false;
+    var ps = null, ts = 0, rs = 0, lt = 0, calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var say = function (t) { bub.textContent = t; el.classList.add('say'); clearTimeout(st); st = setTimeout(function () { el.classList.remove('say'); }, 2600); };
     var ease = function (t) { return t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; };
-    var clamp = function (v, a, b) { return Math.max(a, Math.min(b, v)); };
-    // voo da abelhinha da LP infantil da Humanos Care: ancorado no documento, com movimento próprio e contínuo.
-    // o scroll só desloca; quando sai da tela, espera e volta voando devagar para a área visível.
-    var t0 = performance.now(), last = t0, cx = null, docY, goal, wait = 0, face = 1, walkT = 0, lanes = null, lanesAt = -1;
-    var lane = function (vw, bw) {
-      if (lanes && lanesAt === vw) return lanes;
-      var gut = (vw - 1240) / 2, ok = gut >= bw + 8;
-      lanesAt = vw;
-      lanes = { ok: ok, L: gut / 2, R: vw - gut / 2, room: Math.max(0, gut - bw) * .5 };
-      return lanes;
-    };
-    var loop = function (now) {
-      raf = 0; if (dead) return;
-      var dt = Math.min(.05, Math.max(0, (now - last) / 1000)); last = now;
-      var f60 = dt * 60, k = function (c) { return 1 - Math.pow(1 - c, f60); };
+    var upd = function (now) {
+      raf = 0;
+      var dt = lt ? Math.min(.1, (now - lt) / 1000) : 0; lt = now || 0;
       var vw = window.innerWidth, vh = window.innerHeight, y = window.scrollY, mob = vw <= 900;
       var r = ph.getBoundingClientRect(), w0 = r.width || 150;
-      var tp = ease(clamp(y / (vh * (mob ? .5 : .7)), 0, 1));
-      var gut = (vw - 1240) / 2, w1 = mob ? 40 : gut > 120 ? 60 : 50, h1 = w1 * 1.25;
-      var t = (now - t0) / 1000;
-      // tempo deformado: acelera, desacelera e faz pausas curtas
-      var w = t + .55 * Math.sin(t * .21) + .2 * Math.sin(t * .68 + 1.1);
-      var frot = 0, cy;
-      if (calm) { cx = vw - w1 / 2 - 10; cy = vh * .5; }
-      else {
-        if (docY === undefined) { docY = y + vh * .42; goal = docY; }
-        var drift = Math.sin(w * .13 + .7) * vh * .1 + Math.cos(w * .27) * 12;
-        var sy = docY - y, out = sy < vh * .06 || sy > vh * .94;
-        if (out) {
-          if (!wait) wait = now + 1600; // espera antes de sair atrás da seção
-          else if (now > wait) { goal = y + vh * (.3 + .32 * (.5 + .5 * Math.sin(w * .7))); wait = 0; }
-        } else wait = 0;
-        var pdoc = docY;
-        docY += (goal - docY) * k(.005); // travessia bem lenta, sem pressa
-        var ln = lane(vw, w1), fx;
-        if (ln.ok) {
-          // corredores de respiro nas laterais, trocando de lado devagar
-          var swing = Math.sin(w * .15 + 1.2) + .5 * Math.sin(w * .086 + 1.7);
-          fx = (swing > 0 ? ln.R : ln.L) + Math.sin(w * .29) * ln.room;
-        } else fx = (.5 + .3 * Math.sin(w * .16) + .12 * Math.sin(w * .29 + 1.1)) * vw;
-        if (cx === null) cx = fx;
-        var nfx = cx + (fx - cx) * k(.015), fd = nfx - cx;
-        if (fd > .15 * f60) face = 1; else if (fd < -.15 * f60) face = -1;
-        var hw = w1 / 2 + 2, hh = h1 / 2 + 2;
-        cx = clamp(nfx, hw, vw - hw);
-        cy = clamp(docY + drift - y, -hh, vh + hh);
-        frot = clamp(Math.sin(w * .4) * 6, -10, 10);
-        // perninhas andam quando ele está se deslocando de verdade
-        var sp = dt ? (Math.abs(fd) + Math.abs(docY - pdoc)) / dt : 0;
-        if (sp > 18) walkT = now + 220;
-      }
-      var ww = w0 + (w1 - w0) * tp;
-      var x = r.left + (cx - w1 / 2 - r.left) * tp, yy = r.top + (cy - h1 / 2 - r.top) * tp;
-      el.style.width = ww.toFixed(2) + 'px';
-      el.style.transform = 'translate3d(' + x.toFixed(2) + 'px,' + yy.toFixed(2) + 'px,0) rotate(' + (frot * tp).toFixed(2) + 'deg)';
-      if (svg) svg.style.transform = tp > .5 && face < 0 ? 'scaleX(-1)' : '';
-      el.classList.toggle('walk', tp > .5 && now < walkT);
-      el.classList.toggle('lft', tp > .5 && cx < vw / 2);
+      var max = Math.max(1, document.documentElement.scrollHeight - vh), p = Math.min(1, y / max);
+      var t = ease(Math.min(1, Math.max(0, y / (vh * (mob ? .5 : .7)))));
+      var rt = walking && t > .9 ? dir * (mob ? 6 : 4) : 0;
+      if (ps === null || calm) { ps = p; ts = t; rs = rt; }
+      else if (dt) { var k = 1 - Math.exp(-dt * 7), kr = 1 - Math.exp(-dt * 10); ps += (p - ps) * k; ts += (t - ts) * k; rs += (rt - rs) * kr; }
+      var gut = (vw - 1240) / 2, w1 = mob ? 40 : gut > 120 ? 60 : 50;
+      var x1 = mob ? vw - w1 - 6 + Math.sin(ps * Math.PI * 9) * 3 : (gut > 70 ? vw - gut / 2 - w1 / 2 : vw - w1 - 10) + Math.sin(ps * Math.PI * 9) * Math.min(10, gut / 8);
+      var y1 = vh * .16 + ps * vh * .58;
+      var w = w0 + (w1 - w0) * ts, x = r.left + (x1 - r.left) * ts, yy = r.top + (y1 - r.top) * ts;
+      el.style.width = w.toFixed(2) + 'px';
+      el.style.transform = 'translate3d(' + x.toFixed(2) + 'px,' + yy.toFixed(2) + 'px,0) rotate(' + rs.toFixed(2) + 'deg)';
       el.classList.add('on');
-      if (tp > .98) {
+      if (t > .98) {
         var c = 0; S.forEach(function (s2, i) { if (s2[0].getBoundingClientRect().top < vh * .5) c = i; });
         if (c !== cur) { cur = c; if (c > 0) say(S[c][1]); }
       } else if (y < 40 && cur !== 0) { cur = 0; setTimeout(function () { if (window.scrollY < 40) say(S[0][1]); }, 2600); }
-      raf = requestAnimationFrame(loop);
+      if (Math.abs(p - ps) > .0002 || Math.abs(t - ts) > .001 || Math.abs(rt - rs) > .05) raf = requestAnimationFrame(upd);
+      else lt = 0;
+    };
+    var on = function () {
+      var y = window.scrollY; if (y !== lastY) { dir = y > lastY ? 1 : -1; lastY = y; walking = true; el.classList.add('walk'); clearTimeout(wt); wt = setTimeout(function () { walking = false; el.classList.remove('walk'); if (!raf) raf = requestAnimationFrame(upd); }, 260); }
+      if (!raf) raf = requestAnimationFrame(upd);
     };
     window.addEventListener('tsay', function (e) { say(e.detail); });
-    raf = requestAnimationFrame(loop);
-    this.offMas = function () { dead = true; if (raf) cancelAnimationFrame(raf); clearTimeout(st); };
+    window.addEventListener('scroll', on, { passive: true }); window.addEventListener('resize', on);
+    var kick = function () { if (!raf) raf = requestAnimationFrame(upd); };
+    kick(); setTimeout(kick, 600); setTimeout(kick, 1600);
+    this.offMas = function () { window.removeEventListener('scroll', on); window.removeEventListener('resize', on); clearTimeout(st); clearTimeout(wt); };
   }
   setupRail() {
     var nav = document.querySelector('.prg'), fill = document.querySelector('.prf'), bar = document.querySelector('.prm');

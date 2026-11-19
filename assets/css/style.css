@@ -745,7 +745,3 @@ h1,h2,h3,.t{text-wrap:balance}
 .fc.c4 .ic{background:#EDE6DB;color:#343B3A}
 .fc.c3{bottom:auto!important;top:34%!important}
 @media (max-width:900px){.fc.c4{left:0!important;bottom:4%!important;width:58%!important}.fc.c3,#topo .c3{top:auto!important;bottom:5%!important}.fc.c4{display:none!important}}
-/* mascote: virar de lado só o desenho, e o balão abre para dentro da tela */
-.tms svg{transition:transform .35s ease}
-.tms.lft .tmb{right:auto;left:-6px;border-radius:14px 14px 14px 4px;transform-origin:0 100%}
-@media (max-width:900px){.tms.lft .tmb{left:2px;border-radius:12px 12px 12px 4px}}

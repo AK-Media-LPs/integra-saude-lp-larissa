@@ -31,7 +31,7 @@ Framework Preset **Other** · Root Directory na raiz · sem Build/Install Comman
 
 - `<head>`: adicionados `canonical`, `og:url` e `og:image` absoluta com dimensões.
 - `?v=2` nos arquivos que repetem o nome da v1 (`style.css`, os três JS, `dra-larissa-hero.webp`, `dra-larissa-cta.webp`, `og.jpg`): `/assets/` tem cache imutável de 1 ano, e sem isso quem já abriu a página continuaria com os arquivos antigos. **Trocar o valor de `?v=` a cada mudança em arquivo de mesmo nome.**
-- **Mascote (19/11/2026):** o dentinho usa o mesmo voo da abelhinha da LP infantil da Humanos Care (`AK-Media-LPs/humanos-care-lp-infantil`): começa no lugar dele no topo e, ao rolar, fica ancorado na página com movimento próprio e contínuo (tempo deformado, deriva, inclinação). Quando sai da tela, espera 1,6s e volta voando devagar. No desktop passeia pelas margens laterais e troca de lado; no celular usa a largura toda. Ao virar, só o desenho espelha, e o balão de fala (ativo nas duas telas) abre para dentro da tela. Com `prefers-reduced-motion`, fica parado na borda direita. `main.js?v=5`, `style.css?v=4`.
+- **Mascote (19/11/2026):** o export travava o dentinho no topo em telas de até 900px. Agora ele anda com a rolagem também no mobile (encolhe para 40px e encosta na borda direita), com o balão de fala ativo. O movimento nas duas telas é amortecido: ele persegue o destino em vez de grudar na rolagem, e inclina suave na direção do scroll. Com `prefers-reduced-motion`, volta a seguir sem suavização. `main.js?v=6`, `style.css?v=5` (o voo da abelha da Humanos Care foi testado em 19/11 e revertido).
 - Mantidos da v1: `vercel.json`, `.gitignore` e este README.
 
 ## Pendências
