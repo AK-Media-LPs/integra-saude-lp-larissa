@@ -1,44 +1,42 @@
-# Integra Saúde — LP Dra. Larissa
+# LP Dra. Larissa Pires (v2)
 
 **Cliente:** Integra Saúde · Dra. Larissa Pires Barbosa (Cirurgia e Traumatologia Bucomaxilofacial)
 **Cidade:** Teresina/PI (Av. Universitária, 750, Bairro de Fátima)
-**Objetivo:** levar ao WhatsApp (86) 99990-8713 com mensagem pré-preenchida (pacientes e, em bloco próprio, dentistas que encaminham casos)
+**Objetivo:** levar ao WhatsApp (86) 99990-8713 com mensagem pré-preenchida
 
 ## Stack
 
-HTML e CSS puros, animações com GSAP + ScrollTrigger locais em `assets/js/`, fontes locais em `assets/fonts/`.
-Sem framework, sem bundler, sem build. O export já veio sem o runtime do Claude Design (sem `support.js` nem React).
+Site estático: HTML, CSS e JS só para as animações. Sem framework, sem bundler, sem build.
 
 ```
-index.html            página
-assets/css/style.css  cópia de referência (o CSS ativo está inline no index.html)
-assets/js/            main.js, gsap.min.js, ScrollTrigger.min.js
-assets/fonts/         Instrument Serif e Figtree (woff2)
-assets/img/           fotos, logo e og.jpg (1200×630)
+index.html            página (desktop e mobile no mesmo arquivo)
+assets/css/style.css  estilos, com fontes self-hosted (Montserrat + Playfair Display)
+assets/js/            gsap.min.js e ScrollTrigger.min.js (3.12.5), main.js (animações, mascote, quiz, carrossel, mapa e rastreamento)
+assets/img/           fotos, carrossel, tiles do mapa (z15–z18) e og.jpg (1200×630)
 favicon.*, apple-touch-icon.png
-vercel.json           clean URLs + cache de assets
+vercel.json           clean URLs + cache imutável em /assets/
 ```
 
 ## Deploy — Vercel
 
-Import do repo · Framework Preset **Other** · Root Directory na raiz ·
-sem Build/Install Command, sem Output Directory.
+Projeto `integra-saude-lp-larissa`, integrado a este repo (push na `main` publica em produção).
+Framework Preset **Other** · Root Directory na raiz · sem Build/Install Command, sem Output Directory.
 
-## Edições sobre o exportado
+## Histórico
 
-- Origem: `integra-saude-lps.zip`, pasta `lp-larissa/` (projeto "Larissa-cor" no Claude Design). O zip juntava as duas LPs em um repo; aqui cada LP é um repo, conforme o padrão AK.
-- `<head>`: adicionados `canonical`, `og:url`, `og:image` absoluta com dimensões, `twitter:title`, `twitter:description` e `twitter:image`.
-- Adicionados `vercel.json`, `.gitignore` e este README.
-- Atualização pelo `integra-saude-lpsatt.zip`: nova imagem `perfil-mandibula.webp` no card do topo, barra fixa de WhatsApp no mobile e ajustes na animação do logo e no traçado de fundo.
-- `style.css` e `main.js` referenciados com `?v=` no `index.html`: `/assets/` tem cache imutável de 1 ano, então sem isso quem já abriu a página continuaria com os arquivos antigos. Trocar o valor de `?v=` a cada mudança nesses arquivos.
-- **Performance (07/11/2026):** CSS inline no `<head>` (sai a requisição que bloqueava a renderização; `assets/css/style.css` ficou só como cópia de referência, **editar o CSS dentro do `index.html`**); imagens com `srcset`/`sizes` e variantes `-400`/`-640`/`-960.webp` geradas dos originais (qualidade 80); foto do topo com `fetchpriority="high"` e `preload`; preload da fonte do título; `ScrollTrigger.refresh()` agrupado em vez de um por imagem carregada; traçado de fundo medido depois do primeiro frame e resize agrupado por frame.
-- Fora o acima, visual, layout, copy, CSS e JS como vieram do zip.
+- **v1 (nov/2026):** design verde-petróleo com a marca Integra, export do Claude Design (`integra-saude-lps.zip` e `integra-saude-lpsatt.zip`), depois otimização de performance em 07/11/2026.
+- **v2 (19/11/2026):** novo design (`lp-larissa-v2.zip`), substituição completa dos arquivos da v1. Visual, copy e `main.js` como vieram do zip.
+
+## Edições sobre o exportado (v2)
+
+- `<head>`: adicionados `canonical`, `og:url` e `og:image` absoluta com dimensões.
+- `?v=2` nos arquivos que repetem o nome da v1 (`style.css`, os três JS, `dra-larissa-hero.webp`, `dra-larissa-cta.webp`, `og.jpg`): `/assets/` tem cache imutável de 1 ano, e sem isso quem já abriu a página continuaria com os arquivos antigos. **Trocar o valor de `?v=` a cada mudança em arquivo de mesmo nome.**
+- Mantidos da v1: `vercel.json`, `.gitignore` e este README.
 
 ## Pendências
 
-- **URL real da Vercel / domínio:** trocar o placeholder `https://integra-saude-lp-larissa.vercel.app/` em `canonical`, `og:url`, `og:image` e `twitter:image`, se a URL final for outra.
-- **GTM / Meta Pixel:** colar entre os comentários `TRACKING HEAD` e `TRACKING BODY` do `index.html`. O clique em link de WhatsApp já dispara `dataLayer.push({event:'clique_whatsapp'})`, `fbq('track','Lead')` e `gtag('event','generate_lead')`, se existirem.
-- **Copy:** validação pela Dra. Larissa.
+- **Domínio próprio:** trocar `https://integra-saude-lp-larissa.vercel.app/` em `canonical`, `og:url` e `og:image` quando o domínio da Dra. Larissa for configurado.
+- **GTM / Meta Pixel:** a v1 não tinha nenhum código. Colar entre `TRACKING HEAD` e `TRACKING BODY` no `index.html`. O clique em link `wa.me` já dispara `dataLayer.push({event:'clique_whatsapp'})`, `fbq('track','Lead')` e `gtag('event','generate_lead')`, se existirem.
 - **WhatsApp:** testar o número em um aparelho real.
 
-Última atualização: 07/11/2026
+Última atualização: 19/11/2026
