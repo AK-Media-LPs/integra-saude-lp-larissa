@@ -279,9 +279,9 @@ class Component extends DCLogic {
       var vw = window.innerWidth, vh = window.innerHeight, y = window.scrollY, mob = vw <= 900;
       var r = ph.getBoundingClientRect(), w0 = r.width || 150;
       var max = Math.max(1, document.documentElement.scrollHeight - vh), p = Math.min(1, y / max);
-      var t = mob ? 0 : ease(Math.min(1, Math.max(0, y / (vh * .7))));
-      var gut = (vw - 1240) / 2, w1 = gut > 120 ? 60 : 50;
-      var x1 = (gut > 70 ? vw - gut / 2 - w1 / 2 : vw - w1 - 10) + Math.sin(p * Math.PI * 9) * Math.min(10, gut / 8);
+      var t = ease(Math.min(1, Math.max(0, y / (vh * (mob ? .5 : .7)))));
+      var gut = (vw - 1240) / 2, w1 = mob ? 40 : gut > 120 ? 60 : 50;
+      var x1 = mob ? vw - w1 - 6 + Math.sin(p * Math.PI * 9) * 3 : (gut > 70 ? vw - gut / 2 - w1 / 2 : vw - w1 - 10) + Math.sin(p * Math.PI * 9) * Math.min(10, gut / 8);
       var y1 = vh * .16 + p * vh * .58;
       var w = w0 + (w1 - w0) * t, x = r.left + (x1 - r.left) * t, yy = r.top + (y1 - r.top) * t;
       el.style.width = w + 'px';
