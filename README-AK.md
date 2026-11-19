@@ -25,13 +25,13 @@ Framework Preset **Other** · Root Directory na raiz · sem Build/Install Comman
 ## Histórico
 
 - **v1 (nov/2026):** design verde-petróleo com a marca Integra, export do Claude Design (`integra-saude-lps.zip` e `integra-saude-lpsatt.zip`), depois otimização de performance em 07/11/2026.
-- **v2 (19/11/2026):** novo design (`lp-larissa-v2.zip`), substituição completa dos arquivos da v1. Visual e copy como vieram do zip; `main.js` só com o ajuste do mascote abaixo.
+- **v2 (19/11/2026):** novo design (`lp-larissa-v2.zip`), substituição completa dos arquivos da v1. Visual e copy como vieram do zip; `main.js` e `style.css` só com o ajuste do mascote abaixo.
 
 ## Edições sobre o exportado (v2)
 
 - `<head>`: adicionados `canonical`, `og:url` e `og:image` absoluta com dimensões.
 - `?v=2` nos arquivos que repetem o nome da v1 (`style.css`, os três JS, `dra-larissa-hero.webp`, `dra-larissa-cta.webp`, `og.jpg`): `/assets/` tem cache imutável de 1 ano, e sem isso quem já abriu a página continuaria com os arquivos antigos. **Trocar o valor de `?v=` a cada mudança em arquivo de mesmo nome.**
-- **Mascote no mobile (19/11/2026):** o export travava o dentinho no topo em telas de até 900px (`t = 0`). Agora, ao rolar, ele encolhe para 40px, encosta na borda direita e desce com a página, como no desktop. O balão de fala continua escondido no mobile. `main.js` passou para `?v=3`.
+- **Mascote (19/11/2026):** o export travava o dentinho no topo em telas de até 900px. Agora ele anda com a rolagem também no mobile (encolhe para 40px e encosta na borda direita), com o balão de fala ativo. O movimento nas duas telas é amortecido: ele persegue o destino em vez de grudar na rolagem, e inclina suave na direção do scroll. Com `prefers-reduced-motion`, volta a seguir sem suavização. `main.js?v=4`, `style.css?v=3`.
 - Mantidos da v1: `vercel.json`, `.gitignore` e este README.
 
 ## Pendências

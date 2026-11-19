@@ -271,34 +271,42 @@ class Component extends DCLogic {
     var el = document.querySelector('.tms'), ph = document.querySelector('.tph'), bub = document.querySelector('.tmb');
     if (!el || !ph) return;
     var S = [['#topo','Oi! Vem comigo?'],['#quando','Essas são as áreas dela'],['#sobre','Prazer, Dra. Larissa'],['#sinais','Algum desses é você?'],['#avaliacao','Tudo explicado, sem pressa'],['#duvidas','Dúvida? Tem resposta aqui'],['#clinica','Olha o consultório'],['#local','Fica fácil de chegar'],['#final','Bora agendar?']].map(function (x) { return [document.querySelector(x[0]), x[1]]; }).filter(function (x) { return x[0]; });
-    var raf = 0, lastY = window.scrollY, wt = 0, st = 0, cur = -1, dir = 1;
+    var raf = 0, lastY = window.scrollY, wt = 0, st = 0, cur = -1, dir = 1, walking = false;
+    var ps = null, ts = 0, rs = 0, lt = 0, calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var say = function (t) { bub.textContent = t; el.classList.add('say'); clearTimeout(st); st = setTimeout(function () { el.classList.remove('say'); }, 2600); };
     var ease = function (t) { return t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; };
-    var upd = function () {
+    var upd = function (now) {
       raf = 0;
+      var dt = lt ? Math.min(.1, (now - lt) / 1000) : 0; lt = now || 0;
       var vw = window.innerWidth, vh = window.innerHeight, y = window.scrollY, mob = vw <= 900;
       var r = ph.getBoundingClientRect(), w0 = r.width || 150;
       var max = Math.max(1, document.documentElement.scrollHeight - vh), p = Math.min(1, y / max);
       var t = ease(Math.min(1, Math.max(0, y / (vh * (mob ? .5 : .7)))));
+      var rt = walking && t > .9 ? dir * (mob ? 6 : 4) : 0;
+      if (ps === null || calm) { ps = p; ts = t; rs = rt; }
+      else if (dt) { var k = 1 - Math.exp(-dt * 7), kr = 1 - Math.exp(-dt * 10); ps += (p - ps) * k; ts += (t - ts) * k; rs += (rt - rs) * kr; }
       var gut = (vw - 1240) / 2, w1 = mob ? 40 : gut > 120 ? 60 : 50;
-      var x1 = mob ? vw - w1 - 6 + Math.sin(p * Math.PI * 9) * 3 : (gut > 70 ? vw - gut / 2 - w1 / 2 : vw - w1 - 10) + Math.sin(p * Math.PI * 9) * Math.min(10, gut / 8);
-      var y1 = vh * .16 + p * vh * .58;
-      var w = w0 + (w1 - w0) * t, x = r.left + (x1 - r.left) * t, yy = r.top + (y1 - r.top) * t;
-      el.style.width = w + 'px';
-      el.style.transform = 'translate(' + x.toFixed(1) + 'px,' + yy.toFixed(1) + 'px) rotate(' + (t > .9 ? dir * 4 : 0) + 'deg)';
+      var x1 = mob ? vw - w1 - 6 + Math.sin(ps * Math.PI * 9) * 3 : (gut > 70 ? vw - gut / 2 - w1 / 2 : vw - w1 - 10) + Math.sin(ps * Math.PI * 9) * Math.min(10, gut / 8);
+      var y1 = vh * .16 + ps * vh * .58;
+      var w = w0 + (w1 - w0) * ts, x = r.left + (x1 - r.left) * ts, yy = r.top + (y1 - r.top) * ts;
+      el.style.width = w.toFixed(2) + 'px';
+      el.style.transform = 'translate3d(' + x.toFixed(2) + 'px,' + yy.toFixed(2) + 'px,0) rotate(' + rs.toFixed(2) + 'deg)';
       el.classList.add('on');
-      if (!mob && t > .98) {
+      if (t > .98) {
         var c = 0; S.forEach(function (s2, i) { if (s2[0].getBoundingClientRect().top < vh * .5) c = i; });
         if (c !== cur) { cur = c; if (c > 0) say(S[c][1]); }
       } else if (y < 40 && cur !== 0) { cur = 0; setTimeout(function () { if (window.scrollY < 40) say(S[0][1]); }, 2600); }
+      if (Math.abs(p - ps) > .0002 || Math.abs(t - ts) > .001 || Math.abs(rt - rs) > .05) raf = requestAnimationFrame(upd);
+      else lt = 0;
     };
     var on = function () {
-      var y = window.scrollY; if (y !== lastY) { dir = y > lastY ? 1 : -1; lastY = y; el.classList.add('walk'); clearTimeout(wt); wt = setTimeout(function () { el.classList.remove('walk'); }, 220); }
+      var y = window.scrollY; if (y !== lastY) { dir = y > lastY ? 1 : -1; lastY = y; walking = true; el.classList.add('walk'); clearTimeout(wt); wt = setTimeout(function () { walking = false; el.classList.remove('walk'); if (!raf) raf = requestAnimationFrame(upd); }, 260); }
       if (!raf) raf = requestAnimationFrame(upd);
     };
-    window.addEventListener('tsay', function (e) { if (window.innerWidth > 900) say(e.detail); });
+    window.addEventListener('tsay', function (e) { say(e.detail); });
     window.addEventListener('scroll', on, { passive: true }); window.addEventListener('resize', on);
-    upd(); setTimeout(upd, 600); setTimeout(upd, 1600);
+    var kick = function () { if (!raf) raf = requestAnimationFrame(upd); };
+    kick(); setTimeout(kick, 600); setTimeout(kick, 1600);
     this.offMas = function () { window.removeEventListener('scroll', on); window.removeEventListener('resize', on); clearTimeout(st); clearTimeout(wt); };
   }
   setupRail() {
